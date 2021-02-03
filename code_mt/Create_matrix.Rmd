@@ -1,0 +1,84 @@
+---
+title: "Create matrix"
+date: "today"
+output: 
+  html_document:
+    theme: paper
+    highlights: pygments
+    toc: true 
+    toc_depth: 2
+    toc_float: true 
+    df_print: paged
+    code_folding: show
+---
+# Packages
+
+- Packages that need to be included. 
+
+```{r setup, include=FALSE, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+#install.packages("RODBC")
+#install.packages("dplyr")
+#install.packages("ggplot2") 
+#install.packages("devtools")
+#library("devtools")
+library("RODBC")
+library("dplyr")
+library("ggplot2")
+library("gridExtra")
+library("magrittr")
+#library("EconGeo")
+library("grid")
+#library("lattice")
+#library("igraph")
+```
+
+---
+
+# Create csv files
+```{r}
+library(haven)
+MoldsEntransWorkerEntrep_87_09 <- read_dta("~/OneDrive - Universiteit Utrecht/Complexaton/Challenge4/MoldsEntransWorkerEntrep_87_09.dta")
+library(haven)
+EntrepAno3y_87_09 <- read_dta("~/OneDrive - Universiteit Utrecht/Complexaton/Challenge4/EntrepAno3y_87_09.dta")
+write.csv(EntrepAno3y_87_09, "EntrepAno3y_87_09.csv")
+write.csv(MoldsEntransWorkerEntrep_87_09, "MoldsEntransWorkerEntrep_87_09.csv")
+
+```
+
+# Merge data sets
+```{r}
+# by worker ID number `ntrab`
+datamerged <- merge(MoldsEntransWorkerEntrep_87_09,EntrepAno3y_87_09, by = "ntrab", all = FALSE ) # gives us 39247 observations
+datamerged
+write.csv(datamerged, "Data_Merged_Complexaton.csv")
+```
+
+- unique companies
+
+```{r}
+
+# vector of companies in the merged data
+numb_entr <- as.character(c(unique(datamerged$nuemp_ent)))
+length(numb_entr)
+
+
+# vector of employees in the merged data
+empl_entr <- as.character(c(unique(datamerged$nuemp)))
+length(empl_entr)
+
+# create matrix of this
+mat <- matrix(data = NA, nrow = length(empl_entr), ncol = length(numb_entr), dimnames = list(empl_entr, numb_entr))
+View(mat)
+```
+
+
+
+
+
+
+
+
+
+
