@@ -1,0 +1,103 @@
+---
+title: "Method of Reflection"
+author: "Franziska Tinnefeld"
+date: "29/01/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+#install.packages("RODBC")
+#install.packages("dplyr")
+#install.packages("ggplot2") 
+#install.packages("devtools")
+#library("devtools")
+library("RODBC")
+library("dplyr")
+library("ggplot2")
+library("gridExtra")
+library("magrittr")
+library("EconGeo")
+library("grid")
+#library("lattice")
+#library("igraph")
+library("readr")
+
+```
+
+
+# Create matrix
+```{r}
+matrx_worcom_2 <- read.csv("~/OneDrive - Universiteit Utrecht/Complexaton/Challenge4/DataComplexaton/matrx_worcom_2.txt", row.names=1)
+matrx_worcom <- read.csv("~/OneDrive - Universiteit Utrecht/Complexaton/Challenge4/matrx_worcom.cvs", row.names=1)
+
+matcomemp <- matrx_worcom
+
+# mat1 was only mold companies
+mat1 <- ifelse(matcomemp>0, 1)
+View(mat1)
+dim(mat1)
+
+# matfull1 is mold + plastic + glass
+matfull1 <- ifelse(matrx_worcom_2>0,1)
+View(matfull1)
+
+# some stats
+count(matfull1)
+colSums(matfull1, na.rm = TRUE)
+dim(matfull1)[1]
+sum(colSums(matfull1, na.rm = TRUE))/520
+rowSums(matfull1, na.rm = TRUE)
+sum(rowSums(matfull1, na.rm = TRUE))/1844
+```
+
+
+
+```{r}
+# put entries to binary 0/1
+matfull1 <- ifelse(matrx_worcom_2>0,1)
+matfull1[is.na(matfull1)] <- 0
+mat1[is.na(mat1)] <- 0
+View(mat1)
+View(matfull1)
+```
+
+# Method of Reflection
+```{r}
+# Method of Reflection with even and uneven steps 
+MOR1_uneven <- MORt(mat1, steps = 19)                 #only mold companies
+MORfull_uneven <- MORt(matfull1, steps = 19)          #mold, plastic and glass companies
+MOR1_even <- MORt(mat1, steps = 18)
+MORfull_even <- MORt(matfull1, steps = 18)
+```
+
+
+- create dataframe with count of employees working at each companies and the values for method of reflection
+```{r}
+empcount_MOR_uneven <- as.data.frame(cbind(colSums(matfull1, na.rm = TRUE), MORfull_uneven))
+
+empcount_MOR_even <- as.data.frame(cbind(colSums(matfull1, na.rm = TRUE), MORfull_even))
+
+colnames(empcount_MOR_uneven) <- c("empl_count", "MOR")
+colnames(empcount_MOR_even) <- c("empl_count", "MOR")
+```
+
+
+# Plots
+
+```{r}
+plot(empcount_MOR_uneven$empl_count, empcount_MOR_uneven$MOR)
+plot(empcount_MOR_even$empl_count, empcount_MOR_even$MOR)
+
+
+```
+
+
+
+```{r}
+empcount_MOR_uneven_countlimit <- empcount_MOR_uneven[which(empcount_MOR_uneven$empl_count < 50),]
+empcount_MOR_even_countlimit <- empcount_MOR_even[which(empcount_MOR_even$empl_count < 50),]
+plot(empcount_MOR_uneven_countlimit$empl_count, empcount_MOR_uneven_countlimit$MOR)
+plot(empcount_MOR_even_countlimit$empl_count, empcount_MOR_even_countlimit$MOR)
+```
